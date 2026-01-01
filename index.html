@@ -235,7 +235,7 @@
 
     <!-- Main Countdown UI -->
     <div id="ui-layer">
-        <div class="label">Time Until Midnight</div>
+        <div class="label">Time Until New Year</div>
         <div id="timer">00:00:00</div>
         <!-- Milliseconds for that techy feel -->
         <!-- <div id="milliseconds">000</div> -->
@@ -480,26 +480,48 @@
 
         function updateCountdown() {
             const now = new Date();
-            const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-            // const tomorrow = new Date(now.getTime() + 5000); // Debug: 5 seconds from now
+            const currentYear = now.getFullYear();
             
-            const diff = tomorrow - now;
+            // Target the next January 1st (Midnight of Dec 31st)
+            const targetDate = new Date(currentYear + 1, 0, 1, 0, 0, 0);
+            
+            // Calculate difference
+            const diff = targetDate - now;
 
-            if (diff <= 0 || isCelebrating) {
+            // Trigger Check:
+            // 1. If we are explicitly celebrating (manual trigger)
+            // 2. OR if it is currently Jan 1st and within the first minute (automatic trigger catch)
+            const isNewYearMoment = (now.getMonth() === 0 && now.getDate() === 1 && now.getHours() === 0 && now.getMinutes() === 0);
+
+            if (isCelebrating || isNewYearMoment) {
                 if (!isCelebrating) triggerCelebration();
                 timerDisplay.innerText = "00:00:00";
                 return;
             }
 
+            // Time calculations
+            const d = Math.floor(diff / (1000 * 60 * 60 * 24));
             const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
             const m = Math.floor((diff / (1000 * 60)) % 60);
             const s = Math.floor((diff / 1000) % 60);
-            // const ms = Math.floor((diff % 1000) / 10);
 
-            timerDisplay.innerText = 
-                (h < 10 ? "0" + h : h) + ":" + 
-                (m < 10 ? "0" + m : m) + ":" + 
-                (s < 10 ? "0" + s : s);
+            // Display Logic
+            if (d > 0) {
+                // If there are days remaining, show them and shrink font to fit
+                timerDisplay.style.fontSize = "12vw";
+                timerDisplay.innerText = 
+                    d + ":" + 
+                    (h < 10 ? "0" + h : h) + ":" + 
+                    (m < 10 ? "0" + m : m) + ":" + 
+                    (s < 10 ? "0" + s : s);
+            } else {
+                // If it's the final day (New Year's Eve), show big HH:MM:SS
+                timerDisplay.style.fontSize = "20vw";
+                timerDisplay.innerText = 
+                    (h < 10 ? "0" + h : h) + ":" + 
+                    (m < 10 ? "0" + m : m) + ":" + 
+                    (s < 10 ? "0" + s : s);
+            }
         }
 
         function triggerCelebration() {
